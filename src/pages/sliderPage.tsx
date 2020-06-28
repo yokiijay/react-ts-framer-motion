@@ -1,19 +1,24 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { motion, PanInfo } from 'framer-motion'
+import { motion, PanInfo, useMotionValue, useTransform } from 'framer-motion'
 /** @jsx jsx */
 import { jsx, css } from '@emotion/core'
 import { center } from '../Common/globalCSS'
-import { size } from 'polished'
+
+const progress = 100
+const width = 400
 
 const SliderPage: React.FC<RouteComponentProps> = () => {
   const dragRef = useRef<HTMLDivElement | null>(null)
-  const lineWidth = dragRef.current
+  const widthValue = useMotionValue(width)
+  const progressValue = useMotionValue(progress)
+  const ovalSizeValue = useMotionValue(30)
+  const xValue = useTransform(progressValue, [0, 100], [0, widthValue.get()-ovalSizeValue.get()])
 
-  console.log( dragRef.current )
+  console.log( xValue.get() )
 
   const handleDrag = (ev:MouseEvent | TouchEvent | PointerEvent, info:PanInfo)=>{
-    console.log( info )
+    // console.log( info )
   }
 
   return (
@@ -25,22 +30,28 @@ const SliderPage: React.FC<RouteComponentProps> = () => {
       `}
     >
       {/* <h1>100</h1> */}
-      <div
+      <motion.div
         className='line'
+        style={{ width: widthValue.get() }}
         css={css`
-          width: 400px;
           height: 10px;
           background: lavender;
           border-radius: 20px;
           ${center};
+          justify-content: flex-start;
           cursor: pointer;
         `}
         ref={dragRef}
+        onTap={(ev, info)=>console.log( info )}
       >
         <motion.div
           className='oval'
+          style={{
+            x: xValue,
+            width: ovalSizeValue,
+            height: ovalSizeValue
+          }}
           css={css`
-            ${size(30)};
             background: mediumpurple;
             border-radius: 60px;
             position: absolute;
@@ -56,7 +67,7 @@ const SliderPage: React.FC<RouteComponentProps> = () => {
           dragMomentum={false}
           onDrag={handleDrag}
         >100</motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }
