@@ -1,21 +1,30 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { motion } from 'framer-motion'
+import { motion, PanInfo } from 'framer-motion'
 /** @jsx jsx */
 import { jsx, css } from '@emotion/core'
 import { center } from '../Common/globalCSS'
 import { size } from 'polished'
 
 const SliderPage: React.FC<RouteComponentProps> = () => {
-  const dragRef = useRef(null)
+  const dragRef = useRef<HTMLDivElement | null>(null)
+  const lineWidth = dragRef.current
+
+  console.log( dragRef.current )
+
+  const handleDrag = (ev:MouseEvent | TouchEvent | PointerEvent, info:PanInfo)=>{
+    console.log( info )
+  }
 
   return (
     <div
       style={{ height: '100%' }}
       css={css`
         ${center}
+        flex-direction: column;
       `}
     >
+      {/* <h1>100</h1> */}
       <div
         className='line'
         css={css`
@@ -33,16 +42,20 @@ const SliderPage: React.FC<RouteComponentProps> = () => {
           css={css`
             ${size(30)};
             background: mediumpurple;
-            border-radius: 50%;
+            border-radius: 60px;
             position: absolute;
             cursor: ew-resize;
             border: 2px solid white;
             box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.12);
+            ${center};
+            color: white;
+            font-size: 14px;
           `}
           drag='x'
           dragConstraints={dragRef}
           dragMomentum={false}
-        ></motion.div>
+          onDrag={handleDrag}
+        >100</motion.div>
       </div>
     </div>
   )
