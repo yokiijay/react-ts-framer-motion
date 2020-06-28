@@ -1,24 +1,24 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { motion, PanInfo, useMotionValue, useTransform } from 'framer-motion'
+import { motion, PanInfo, useMotionValue, useTransform, transform } from 'framer-motion'
 /** @jsx jsx */
 import { jsx, css } from '@emotion/core'
 import { center } from '../Common/globalCSS'
 
-const progress = 100
+const initProgress = 90
 const width = 400
 
 const SliderPage: React.FC<RouteComponentProps> = () => {
   const dragRef = useRef<HTMLDivElement | null>(null)
   const widthValue = useMotionValue(width)
-  const progressValue = useMotionValue(progress)
+  const progressValue = useMotionValue(initProgress)
   const ovalSizeValue = useMotionValue(30)
-  const xValue = useTransform(progressValue, [0, 100], [0, widthValue.get()-ovalSizeValue.get()])
+  // const xValue = useTransform(progressValue, [0, 100], [0, widthValue.get()-ovalSizeValue.get()])
+  const xValue = useMotionValue(widthValue.get()*progressValue.get()/100-ovalSizeValue.get())
 
-  console.log( xValue.get() )
-
-  const handleDrag = (ev:MouseEvent | TouchEvent | PointerEvent, info:PanInfo)=>{
-    // console.log( info )
+  const [progress, setProgress] = useState<number>(progressValue.get())
+  const handleDrag = ()=>{
+    setProgress(transform(xValue.get(), [0, widthValue.get()-ovalSizeValue.get()], [0, 100]))
   }
 
   return (
@@ -32,7 +32,7 @@ const SliderPage: React.FC<RouteComponentProps> = () => {
       {/* <h1>100</h1> */}
       <motion.div
         className='line'
-        style={{ width: widthValue.get() }}
+        style={{ width: widthValue }}
         css={css`
           height: 10px;
           background: lavender;
@@ -42,7 +42,6 @@ const SliderPage: React.FC<RouteComponentProps> = () => {
           cursor: pointer;
         `}
         ref={dragRef}
-        onTap={(ev, info)=>console.log( info )}
       >
         <motion.div
           className='oval'
@@ -66,7 +65,8 @@ const SliderPage: React.FC<RouteComponentProps> = () => {
           dragConstraints={dragRef}
           dragMomentum={false}
           onDrag={handleDrag}
-        >100</motion.div>
+          // onDragStart={()=>}
+        >{Math.floor(progress)}</motion.div>
       </motion.div>
     </div>
   )
