@@ -4,6 +4,8 @@ import SliderPage from './pages/sliderPage'
 /** @jsx jsx */
 import { jsx, css, Global } from '@emotion/core'
 import { normalize } from 'polished'
+import SliderDemo from './pages/sliderDemo'
+import RecStars from './pages/recStars'
 
 const App: React.FC = () => {
   return(
@@ -17,6 +19,8 @@ const App: React.FC = () => {
 
       <Router id='router'>
         <SliderPage path='slider' />
+        <SliderDemo path='slider-demo' />
+        <RecStars path='star' />
       </Router>
     </React.Fragment>
   )
