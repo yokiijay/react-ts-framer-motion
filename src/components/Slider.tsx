@@ -75,7 +75,6 @@ const Slider: React.FC<Props> = ({
 
   motionProgress.onChange(v=>{
     setProgress(Math.floor(v))
-    console.log( progress )
   })
 
   // 事件
