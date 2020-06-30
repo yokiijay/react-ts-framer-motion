@@ -15,7 +15,7 @@ import { cover, rgba, tint } from 'polished'
 const lineCSS = css`
   position: relative;
   width: 400px;
-  height: 10px;
+  height: 8px;
   background: lavender;
   border-radius: 20px;
   display: flex;
@@ -38,6 +38,7 @@ const ovalCSS = css`
     box-shadow: 0 0 0 8px ${tint(0.8, 'mediumslateblue')};
     color: ${rgba('white', 8)};
   }
+  opacity: .4;
 `
 const ovalDragingCSS = css`
   box-shadow: 0 0 0 8px ${tint(0.8, 'mediumslateblue')};
@@ -45,7 +46,7 @@ const ovalDragingCSS = css`
 `
 const progressLineCSS = css`
   ${cover()};
-  background: mediumslateblue;
+  background: linear-gradient(to right, ${tint(.4, 'mediumslateblue')}, mediumslateblue);
   border-radius: 20px;
 `
 
@@ -61,7 +62,7 @@ const Slider: React.FC<Props> = ({
   initialProgress = 50
 }) => {
   const ovalWidthValue = useMotionValue(ovalSize)
-  const ovalXValue = useMotionValue( transform(initialProgress, [0, 100], [0, width - ovalWidthValue.get()]) )
+  const ovalXValue = useMotionValue( transform(initialProgress, [0, 100], [-ovalWidthValue.get()/2, width - ovalWidthValue.get()/2]) )
   const ovalProgressValue = useTransform( ovalXValue, [0, width - ovalWidthValue.get()], [0, 100] )
 
   const animation = useAnimation()
@@ -82,7 +83,7 @@ const Slider: React.FC<Props> = ({
   const handleTap: (event: MouseEvent, info: TapInfo)=> void = (ev, info)=>{
     const {offsetX} = ev
     animation.start({
-      x: offsetX
+      x: offsetX - ovalWidthValue.get()/2
     })
   }
 
@@ -95,8 +96,8 @@ const Slider: React.FC<Props> = ({
         animate={animation}
         drag='x'
         dragConstraints={{
-          left: 0,
-          right: width - ovalWidthValue.get()
+          left: ovalWidthValue.get()/2,
+          right: width - ovalWidthValue.get()/2
         }}
         dragMomentum={false}
         dragElastic={false}
@@ -108,7 +109,7 @@ const Slider: React.FC<Props> = ({
       <motion.div
         className='progress-line'
         css={progressLineCSS}
-        style={{ width: ovalXValue.get() + ovalWidthValue.get() }}
+        style={{ width: ovalXValue.get() + ovalWidthValue.get()/2 }}
       />
     </motion.div>
   )

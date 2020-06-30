@@ -9,11 +9,10 @@ import { RouteComponentProps } from '@reach/router'
 const SliderPage: React.FC<RouteComponentProps> = () => {
   return(
     <Container>
-      <Slider />
+      <Slider width={400} ovalSize={30} initialProgress={0} />
     </Container>
   )
 }
-
 
 const Container: React.FC = props => {
   return (
