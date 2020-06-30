@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState } from 'react'
 /** @jsx jsx */
 import { jsx, css } from '@emotion/core'
 import { center } from '../Common/globalCSS'
@@ -8,7 +8,6 @@ import {
   useTransform,
   transform,
   useAnimation,
-  TapInfo
 } from 'framer-motion'
 import { cover, rgba, tint } from 'polished'
 
@@ -38,7 +37,6 @@ const ovalCSS = css`
     box-shadow: 0 0 0 8px ${tint(0.8, 'mediumslateblue')};
     color: ${rgba('white', 8)};
   }
-  opacity: .4;
 `
 const ovalDragingCSS = css`
   box-shadow: 0 0 0 8px ${tint(0.8, 'mediumslateblue')};
@@ -61,29 +59,31 @@ const Slider: React.FC<Props> = ({
   ovalSize = 30,
   initialProgress = 50
 }) => {
-  const ovalWidthValue = useMotionValue(ovalSize)
-  const ovalXValue = useMotionValue( transform(initialProgress, [0, 100], [-ovalWidthValue.get()/2, width - ovalWidthValue.get()/2]) )
-  const ovalProgressValue = useTransform( ovalXValue, [0, width - ovalWidthValue.get()], [0, 100] )
+  // 元素
+  const dragRef = useRef(null)
 
+  // state
+  const [progress, setProgress] = useState(initialProgress)
+
+  // motion值
+  const motionOvalX = useMotionValue(transform(initialProgress, [0, 100], [0, width - ovalSize/2]))
+  const motionProgress = useTransform(motionOvalX, [0, width-ovalSize], [0, 100])
+  const motionLineWidth = useTransform(motionProgress, [0, 100], [ovalSize/2, width])
+
+  // animationControls
   const animation = useAnimation()
 
-  const dragRef = useRef<HTMLDivElement>(null)
-  const [isDraging, setDraging] = useState<boolean>(false)
-  const [progress, setProgress] = useState<number>(ovalProgressValue.get())
+  motionProgress.onChange(v=>{
+    setProgress(Math.floor(v))
+    console.log( progress )
+  })
 
-  useEffect(() => {
-    const unsubscribe = ovalProgressValue.onChange(() =>
-      setProgress(ovalProgressValue.get())
-    )
-    return () => {
-      unsubscribe()
-    }
-  }, [ovalWidthValue, ovalXValue, ovalProgressValue])
-
-  const handleTap: (event: MouseEvent, info: TapInfo)=> void = (ev, info)=>{
+  // 事件
+  const handleTap: (ev:MouseEvent | PointerEvent)=>void = (ev)=>{
     const {offsetX} = ev
+    const x = transform(offsetX, [0, width], [0, width-ovalSize], {clamp: true})
     animation.start({
-      x: offsetX - ovalWidthValue.get()/2
+      x
     })
   }
 
@@ -91,25 +91,27 @@ const Slider: React.FC<Props> = ({
     <motion.div className='line' css={lineCSS} ref={dragRef} onTap={handleTap}>
       <motion.div
         className='oval'
-        css={[ovalCSS, isDraging && ovalDragingCSS]}
-        style={{ x: ovalXValue, width: ovalWidthValue, height: ovalSize }}
+        style={{
+          x: motionOvalX,
+          width: ovalSize,
+          height: ovalSize
+        }}
+        css={[ovalCSS]}
         animate={animation}
         drag='x'
-        dragConstraints={{
-          left: ovalWidthValue.get()/2,
-          right: width - ovalWidthValue.get()/2
-        }}
+        dragConstraints={dragRef}
         dragMomentum={false}
-        dragElastic={false}
-        onDragStart={() => setDraging(true)}
-        onDragEnd={() => setDraging(false)} whileHover={{scale: 1.2}} onTap={ev=>ev.stopImmediatePropagation()}>
-        {Math.floor(progress)}
+        dragElastic={false} onTap={ev=>ev.stopImmediatePropagation()}>
+        {progress}
       </motion.div>
 
       <motion.div
         className='progress-line'
         css={progressLineCSS}
-        style={{ width: ovalXValue.get() + ovalWidthValue.get()/2 }}
+        style={{
+          width: motionLineWidth,
+          opacity: transform(progress, [0, 100], [.6, 1])
+        }}
       />
     </motion.div>
   )
